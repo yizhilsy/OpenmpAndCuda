@@ -16,8 +16,15 @@ public:
     // 矩阵乘法
     Matrix<ElemType> operator*(const Matrix<ElemType>& m1);
     // 打印矩阵
-    ostream& operator << (ostream& out);
+    // 重载<<
+
+    template<class T>
+    friend ostream& operator<<(ostream& out,const Matrix<T>& m);
+    
     ElemType getElem(int row,int col);
+    int getRows();
+    int getCols();
+    ElemType* getPtr();
 };
 
 // 矩阵类模板
@@ -88,11 +95,11 @@ Matrix<ElemType> Matrix<ElemType>::operator*(const Matrix<ElemType>& m1) {
     return multiRes;
 }
 
-template<typename ElemType>
-ostream& Matrix<ElemType>:: operator<<(ostream& out) {
-    for(int i =0;i<this->rows;i++) {
-        for(int j=0;j<this->cols;j++) {
-            out << this->ptr[i*cols + j] << " ";
+template<class T>
+ostream& operator<<(ostream& out,const Matrix<T>& m) {
+    for(int i =0;i<m.rows;i++) {
+        for(int j=0;j<m.cols;j++) {
+            out << m.ptr[i*m.cols + j] << " ";
         }
         out << endl;
     }
@@ -101,7 +108,20 @@ ostream& Matrix<ElemType>:: operator<<(ostream& out) {
 
 template<typename ElemType>
 ElemType Matrix<ElemType>::getElem(int row,int col) {
-    cout<<row<<","<<col<<endl;
-    cout<<row*this->cols + col<<endl;
-    return this->ptr[row*(this->cols) + col];
+    return ptr[row*(this->cols) + col];
+}
+
+template<typename ElemType>
+int Matrix<ElemType>::getRows() {
+    return this->rows;
+}
+
+template<typename ElemType>
+int Matrix<ElemType>::getCols() {
+    return this->cols;
+}
+
+template<typename ElemType>
+ElemType* Matrix<ElemType>::getPtr() {
+    return this->ptr;
 }
