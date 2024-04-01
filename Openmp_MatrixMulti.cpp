@@ -15,7 +15,6 @@ int main()
     test01();
     cout<<"**************************"<<endl;
     test02();
-    
     return 0;
 }
 
@@ -27,7 +26,9 @@ void test01() {
     Matrix<int> m1(r1,c1,array1);
     Matrix<int> m2(r2,c2,array2);
     Matrix<int> m3 = m1*m2;
-    cout<<m3<<endl;
+    cout<<m3;
+    Matrix<int> m4 = m1.parallelMulti(m2);
+    cout<<m4;
 }
 
 void test02() { //生成1000*1000的两个矩阵相乘
@@ -58,27 +59,12 @@ void test02() { //生成1000*1000的两个矩阵相乘
     Matrix<int> m3 = m1*m2;
     endTime = clock();
     basicTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"基本的串行算法时间："<<basicTime<<endl;
-
+    cout<<"Serial Algorithm Time:"<<basicTime<<endl;
     // 使用openmp加速
-    int ans[1000][1000];
-    startTime = clock();
-
-    #pragma omp parallel
-    {
-        #pragma omp for
-        for (int i = 0; i < r1; ++i) {
-            for (int j = 0; j < c2; ++j) {
-                int value = 0;
-                for (int k = 0; k < c1; ++k) {
-                    value += m1.getElem(i,k)*m2.getElem(k,j);
-                }
-                ans[i][j] = value;
-            }
-        }
-    }
-    
-    endTime = clock();
-    basicTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"并行算法时间："<<basicTime<<endl;
+    clock_t fStartTime,fEndTime;double fTime;
+    fStartTime = clock();
+    Matrix<int> m4 = m1.parallelMulti(m2);
+    fEndTime = clock();
+    fTime = (double)(fEndTime-fStartTime)/CLOCKS_PER_SEC;
+    cout<<"Parallel Algorithm Time:"<<fTime<<endl;
 }
