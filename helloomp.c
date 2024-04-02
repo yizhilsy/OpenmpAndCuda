@@ -3,7 +3,7 @@
 int main()
 {
     int nthreads,tid;
-    omp_set_num_threads(8);
+    // omp_set_num_threads(8);
     #pragma omp parallel private(nthreads,tid)
     {
         tid = omp_get_thread_num();
