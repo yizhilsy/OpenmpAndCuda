@@ -4,19 +4,18 @@
 #include <stdlib.h>
 #include <random>
 #include "Matrix.h"
+#include <chrono>
 using namespace std;
 
 void test01();
 void test02();
 void experiment();
 
-
-
 int main()
 {
-    // test01();
-    // cout<<"**************************"<<endl;
-    // test02();
+    test01();
+    cout<<"**************************"<<endl;
+    test02();
     experiment();
     return 0;
 }
@@ -39,7 +38,6 @@ void experiment() {
     std::mt19937 gen(rd()); // 使用 Mersenne Twister 引擎
     std::uniform_int_distribution<> dis(1, 10); // 生成范围在1到100之间的均匀分布的整数
 
-
     for(int i=1000;i<=3000;i+=1000) {
         cout<<"=========="<<i<<"*"<<i<<"Matrix=========="<<endl;
         int r1=i,c1=i,r2=i,c2=i;
@@ -55,50 +53,49 @@ void experiment() {
         Matrix<int> m1(r1,c1,arrayA);
         Matrix<int> m2(r2,c2,arrayB);
         Matrix<int> resm;
-        clock_t startTime,endTime;double durationTime;
 
         cout<<"*****1 Threads*****"<<endl;
-        startTime = clock();
+        auto start = std::chrono::high_resolution_clock::now();
         resm = m1.parallelMulti(m2,1);
-        endTime = clock();
-        durationTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-        cout<<"One Thread Algorithm Time:"<<durationTime<<endl;
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = finish - start;
+        cout<<"One Thread Algorithm Time:"<< elapsed.count() << endl;
         cout<<resm.getElem(101,811)<<endl;
 
         cout<<"*****2 Threads*****"<<endl;
-        startTime = clock();
+        start = std::chrono::high_resolution_clock::now();
         resm = m1.parallelMulti(m2,2);
-        endTime = clock();
-        durationTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-        cout<<"Two Thread Algorithm Time:"<<durationTime<<endl;
+        finish = std::chrono::high_resolution_clock::now();
+        elapsed = finish - start;
+        cout<<"Two Thread Algorithm Time:"<< elapsed.count() <<endl;
 
         cout<<"*****4 Threads*****"<<endl;
-        startTime = clock();
+        start = std::chrono::high_resolution_clock::now();
         resm = m1.parallelMulti(m2,4);
-        endTime = clock();
-        durationTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-        cout<<"Four Thread Algorithm Time:"<<durationTime<<endl;
+        finish = std::chrono::high_resolution_clock::now();
+        elapsed = finish - start;
+        cout<<"Four Thread Algorithm Time:"<< elapsed.count() <<endl;
 
         cout<<"*****8 Threads*****"<<endl;
-        startTime = clock();
+        start = std::chrono::high_resolution_clock::now();
         resm = m1.parallelMulti(m2,8);
-        endTime = clock();
-        durationTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-        cout<<"Eight Thread Algorithm Time:"<<durationTime<<endl;
+        finish = std::chrono::high_resolution_clock::now();
+        elapsed = finish - start;
+        cout<<"Eight Thread Algorithm Time:"<<elapsed.count()<<endl;
 
         cout<<"*****16 Threads*****"<<endl;
-        startTime = clock();
+        start = std::chrono::high_resolution_clock::now();
         resm = m1.parallelMulti(m2,16);
-        endTime = clock();
-        durationTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-        cout<<"Sixteen Thread Algorithm Time:"<<durationTime<<endl;
+        finish = std::chrono::high_resolution_clock::now();
+        elapsed = finish - start;
+        cout<<"Sixteen Thread Algorithm Time:"<< elapsed.count() <<endl;
 
         cout<<"*****32 Threads*****"<<endl;
-        startTime = clock();
+        start = std::chrono::high_resolution_clock::now();
         resm = m1.parallelMulti(m2,32);
-        endTime = clock();
-        durationTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-        cout<<"ThirtyTwo Thread Algorithm Time:"<<durationTime<<endl;
+        finish = std::chrono::high_resolution_clock::now();
+        elapsed = finish - start;
+        cout<<"ThirtyTwo Thread Algorithm Time:"<< elapsed.count() <<endl;
         cout<<resm.getElem(101,811)<<endl;
     }
 }
