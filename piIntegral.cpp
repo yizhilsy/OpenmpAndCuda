@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <cstring>
+#include <chrono>
 using namespace std;
 typedef long long LL;
 const int numSteps = 1000000000;
@@ -11,49 +12,48 @@ const int numSteps = 1000000000;
 void Serial() {
     double step = 1.0 / (double)numSteps;
     double sum = 0;
-    clock_t startTime,endTime;double totalTime;
-    startTime = clock();
+    auto start = std::chrono::high_resolution_clock::now();
     for(double i = 0; i<numSteps; i++) {
         double x = (i + 0.5) * step;
         double y = 4.0 / (1.0 + x*x);
         sum += step*y;
     }
-    endTime = clock();
-    totalTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"The Pai Integer:"<<sum<<",time:"<<totalTime<<endl;
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    cout<<"The Pai Integer:"<<sum<<",time:"<<elapsed.count()<<endl;
 }
 
 // 使用归约和for法
 void ParallelA() {
     double step = 1.0 / (double)numSteps;
     double sum = 0;
-    clock_t startTime,endTime;double totalTime;
-    startTime = clock();
     // 定义每个线程计算的行数
     const int OMP_THREAD_NUM = 8;
+    auto start = std::chrono::high_resolution_clock::now();
     #pragma omp parallel for schedule(dynamic, 1000000) reduction(+:sum) num_threads(OMP_THREAD_NUM)
     for(int i = 0; i<numSteps; i++) {
         double x = ((double)i + 0.5) * step;
         double y = 4.0 / (1.0 + x*x);
         sum += step*y;
     }
-    endTime = clock();
-    totalTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"The Pai Integer:"<<sum<<",time:"<<totalTime<<endl;
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    cout<<"The Pai Integer:"<<sum<<",time:"<<elapsed.count()<<endl;
 }
 
 // 使用经典法
 void ParallelB() {
     double step = 1.0 / (double)numSteps;
     double sum = 0;double partSum = 0;
-    const int OMP_THREAD_NUM = 8;
-    const int LINE_FOR_THREADS = (numSteps + OMP_THREAD_NUM - 1) / OMP_THREAD_NUM;
-
+    int OMP_THREAD_NUM = 8;
+    int LINE_FOR_THREADS = (numSteps + OMP_THREAD_NUM - 1) / OMP_THREAD_NUM;
+    if(LINE_FOR_THREADS==0) {
+        OMP_THREAD_NUM = numSteps;
+        LINE_FOR_THREADS = 1;
+    }
     double sumArray[OMP_THREAD_NUM];
     memset(sumArray,0,sizeof(sumArray));
-
-    clock_t startTime,endTime;double totalTime;
-    startTime = clock();
+    auto start = std::chrono::high_resolution_clock::now();
     #pragma omp parallel for private(partSum) num_threads(OMP_THREAD_NUM) 
     for(int i=0; i<OMP_THREAD_NUM; i++) {
         for(int j=i*LINE_FOR_THREADS; j<(i+1)*LINE_FOR_THREADS && j<numSteps; j++) {
@@ -63,14 +63,12 @@ void ParallelB() {
         }
         sumArray[i] = partSum;
     }
-
     for(int i=0;i<OMP_THREAD_NUM;i++) {
         sum += sumArray[i];
     }
-
-    endTime = clock();
-    totalTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"The Pai Integer:"<<sum<<",time:"<<totalTime<<endl;
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    cout<<"Using Parallel Region, "<<"The Pai Integer:"<<sum<<",time:"<<elapsed.count()<<endl;
 }
 
 // 使用private和critical法
@@ -80,8 +78,8 @@ void ParallelC() {
     clock_t startTime,endTime;double totalTime;
     // 定义每个线程计算的行数
     const int OMP_THREAD_NUM = 8;
-    startTime = clock();
-    #pragma omp parallel private(x,sum) num_threads(OMP_THREAD_NUM)
+    auto start = std::chrono::high_resolution_clock::now();
+    #pragma omp parallel private(x,sum) num_threads(OMP_THREAD_NUM) shared(pi)
     {
         int id = omp_get_thread_num();
         for(int i=id;i<numSteps;i+=OMP_THREAD_NUM) {
@@ -95,9 +93,9 @@ void ParallelC() {
         }
     }
 
-    endTime = clock();
-    totalTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"The Pai Integer:"<<pi<<",time:"<<totalTime<<endl;
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    cout<<"Using critical and private, The Pai Integer:"<<pi<<",time:"<<elapsed.count()<<endl;
 }
 
 // 共享任务结构，任务队列法
@@ -109,15 +107,16 @@ void ParallelD() {
     const int OMP_THREAD_NUM = 8;
     const int LINE_FOR_THREADS = (numSteps + OMP_THREAD_NUM - 1) / OMP_THREAD_NUM;
     double pi = 0.0;
-    clock_t startTime,endTime;double totalTime;
-    startTime = clock();
-    #pragma omp parallel
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    #pragma omp parallel num_threads(OMP_THREAD_NUM)
     {
         #pragma omp single nowait
         {
             for(int i=0;i<OMP_THREAD_NUM;i++) {
                 #pragma omp task firstprivate(i)
                 {
+                    // cout<<omp_get_thread_num()<<endl;
                     double partSum = 0.0;
                     for(int j=i*LINE_FOR_THREADS;j<(i+1)*LINE_FOR_THREADS && j<numSteps;j++) {
                         double x = ((double)j + 0.5)* step;
@@ -130,9 +129,9 @@ void ParallelD() {
             }
         }
     }
-    endTime = clock();
-    totalTime = (double)(endTime-startTime)/CLOCKS_PER_SEC;
-    cout<<"The Pai Integer:"<<pi<<",time:"<<totalTime<<endl;
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    cout<<"Using Task Queue, The Pai Integer:"<<pi<<",time:"<<elapsed.count()<<endl;
 
 }
 
