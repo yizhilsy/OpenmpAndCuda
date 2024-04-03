@@ -10,13 +10,16 @@ using namespace std;
 void test01();
 void test02();
 void experiment();
+void Serial();
+
 
 int main()
 {
-    test01();
-    cout<<"**************************"<<endl;
-    test02();
+    // test01();
+    // cout<<"**************************"<<endl;
+    // test02();
     experiment();
+    // Serial();
     return 0;
 }
 
@@ -42,9 +45,9 @@ void experiment() {
         cout<<"=========="<<i<<"*"<<i<<"Matrix=========="<<endl;
         int r1=i,c1=i,r2=i,c2=i;
         int arrayA[r1*c1],arrayB[r2*c2];
-        for(int i=0;i<1000;i++) {
-            for(int j=0;j<1000;j++) {
-                int pos = i*1000 + j;
+        for(int j=0;j<r1;j++) {
+            for(int k=0;k<c1;k++) {
+                int pos = j*c1 + k;
                 // 生成随机数
                 arrayA[pos] = dis(gen);
                 arrayB[pos] = dis(gen);
@@ -136,4 +139,32 @@ void test02() { //生成1000*1000的两个矩阵相乘
     fEndTime = clock();
     fTime = (double)(fEndTime-fStartTime)/CLOCKS_PER_SEC;
     cout<<"Parallel Algorithm Time:"<<fTime<<endl;
+}
+
+void Serial() {
+    std::random_device rd;  // 使用随机设备作为种子
+    std::mt19937 gen(rd()); // 使用 Mersenne Twister 引擎
+    std::uniform_int_distribution<> dis(1, 10); // 生成范围在1到100之间的均匀分布的整数
+
+    for(int i=1000;i<=3000;i+=1000) {
+        cout<<"=========="<<i<<"*"<<i<<"Matrix=========="<<endl;
+        int r1=i,c1=i,r2=i,c2=i;
+        int arrayA[r1*c1],arrayB[r2*c2];
+        for(int j=0;j<r1;j++) {
+            for(int k=0;k<c1;k++) {
+                int pos = j*c1 + k;
+                // 生成随机数
+                arrayA[pos] = dis(gen);
+                arrayB[pos] = dis(gen);
+            }
+        }
+        Matrix<int> m1(r1,c1,arrayA);
+        Matrix<int> m2(r2,c2,arrayB);
+        Matrix<int> resm;
+        auto start = std::chrono::high_resolution_clock::now();
+        resm = m1*m2;
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = finish - start;
+        cout<<"Serial Algorithm Time:"<< elapsed.count() << endl;
+    }
 }
