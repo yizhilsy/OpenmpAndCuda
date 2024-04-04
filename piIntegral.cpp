@@ -38,7 +38,7 @@ void ParallelA() {
     }
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
-    cout<<"The Pai Integer:"<<sum<<",time:"<<elapsed.count()<<endl;
+    cout<<"Using Reduction and dynamic Schedule, The Pai Integer:"<<sum<<",time:"<<elapsed.count()<<endl;
 }
 
 // 使用经典法
@@ -140,8 +140,8 @@ int main()
 {
     Serial();
     ParallelA();
-    ParallelB();
-    ParallelC();
-    ParallelD();
+    // ParallelB();
+    // ParallelC();
+    // ParallelD();
     return 0;
 }
